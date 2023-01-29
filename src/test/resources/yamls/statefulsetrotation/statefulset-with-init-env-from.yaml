@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: application
+spec:
+  replicas: 1
+  serviceName: application
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: statefulset
+      app.kubernetes.io/instance: application
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: statefulset
+        app.kubernetes.io/instance: application
+    spec:
+      containers:
+        - name: statefulset
+          image: "nginx:latest"
+          imagePullPolicy: IfNotPresent
+      initContainers:
+        - name: test
+          image: "bash:latest"
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: application-properties

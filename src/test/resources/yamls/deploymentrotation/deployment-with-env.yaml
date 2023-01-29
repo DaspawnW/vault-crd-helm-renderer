@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: deployment
+      app.kubernetes.io/instance: application
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: deployment
+        app.kubernetes.io/instance: application
+    spec:
+      containers:
+        - name: deployment
+          image: "nginx:latest"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: test-secret
+              valueFrom:
+                secretKeyRef:
+                  key: test-key
+                  name: application-properties

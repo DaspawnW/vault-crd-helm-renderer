@@ -1,0 +1,135 @@
+---
+# Source: deployment/charts/deployment/templates/grafana-dashboard.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-deploy-grafana
+  labels:
+    grafana-dashboard-provisioner: "template"
+    app.kubernetes.io/name: deployment
+    helm.sh/chart: deployment-0.5.13
+    app.kubernetes.io/instance: application
+    app.kubernetes.io/version: "1.0"
+data:
+  application-deploy-grafana.yaml: |-
+    template: global/deployment.json
+    stage: dev
+    namespace: star-eu-pr
+    appName: application
+    backstageTag: component_application
+    kafkaTopic: {}
+    grafanaTopicOptions: []
+---
+# Source: deployment/charts/deployment/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: application
+  labels:
+    app.kubernetes.io/name: deployment
+    helm.sh/chart: deployment-0.5.13
+    app.kubernetes.io/instance: application
+    app.kubernetes.io/version: "1.0"
+
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: deployment
+    app.kubernetes.io/instance: application
+---
+# Source: deployment/charts/deployment/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application
+  labels:
+    app.kubernetes.io/name: deployment
+    helm.sh/chart: deployment-0.5.13
+    app.kubernetes.io/instance: application
+    app.kubernetes.io/version: "1.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: deployment
+      app.kubernetes.io/instance: application
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: deployment
+        app.kubernetes.io/instance: application
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/scheme: "http"
+        prometheus.io/port: "8081"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+        - name: deployment
+          image: "nginx:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 384Mi
+          volumeMounts:
+            - mountPath: /opt/properties
+              name: properties
+      serviceAccountName: pg-crd-application
+      volumes:
+        - name: properties
+          secret:
+            secretName: application-properties
+---
+# Source: deployment/charts/deployment/templates/database-extension.yaml
+# end if databases
+---
+# Source: deployment/charts/deployment/templates/database-user.yaml
+# end if databases # end if databaseUsers
+---
+# Source: deployment/templates/properties.yaml
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: application-properties
+  labels:
+    app.kubernetes.io/instance: application
+    app.kubernetes.io/version: "1.0"
+spec:
+  type: "PROPERTIES"
+  propertiesConfiguration:
+    context:
+      namespace: test-namespace
+      ephemeralstage: ""
+      propertiesstage: ""
+    files:
+      
+      application.properties: |-
+        spring.datasource.url=jdbc:postgresql://{{ vault.lookupV2('datasource/host', 'host') }}:5432/database_name
+        spring.datasource.username={{ vault.lookupV2('datasource/credentials', 'username') }}
+        spring.datasource.password={{ vault.lookupV2('datasource/credentials', 'password') }}

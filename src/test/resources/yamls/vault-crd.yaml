@@ -1,0 +1,21 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: example-properties
+  labels:
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0"
+spec:
+  type: "PROPERTIES"
+  propertiesConfiguration:
+    context:
+      namespace: example-namespace
+    files:
+      simple-string: "nothing-here"
+      rendered-secret: "{{ vault.lookupV2('kv-test/qwe/asd', 'username') }}"
+      render-context: "{{ namespace }}"
+      v1-lookup: "{{ vault.lookup('kv-1-test/qwe/asd', 'password') }}"
+      mix-multiline: |
+        simple-string: "nothing-here"
+        rendered-secret: "{{ vault.lookupV2('kv-test/qwe/asd', 'username') }}"
+        render-context: "{{ namespace }}"
