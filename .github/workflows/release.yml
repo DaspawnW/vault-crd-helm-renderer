@@ -21,24 +21,14 @@ jobs:
         run: mvn -B package --file pom.xml
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          files: | 
+            target/vault-crd-helm-renderer.jar
+            target/vault-crd-helm-renderer.jar.sha1
+            target/bom.json
+          generate_release_notes: true
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-          body: |
-            Build available as jar
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/vault-crd-helm-renderer.jar
-          asset_name: vault-crd-helm-renderer.jar
-          asset_content_type: application/x-executable
+          name: Release ${{ github.ref }}
