@@ -31,4 +31,4 @@ jobs:
             target/bom.json
           generate_release_notes: true
           tag_name: ${{ github.ref }}
-          name: Release ${{ github.ref }}
+          name: ${{ github.ref_name }}
