@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 class HelmChartParserTest {
 
@@ -49,7 +50,8 @@ class HelmChartParserTest {
         List<HasMetadata> vaultResources = Arrays.stream(rawOutput.split("---"))
                 .map(Serialization::unmarshal)
                 .map(HasMetadata.class::cast)
-                .filter(HelmChartParser::isVaultResource).toList();
+                .filter(HelmChartParser::isVaultResource)
+                .collect(Collectors.toList());
         Assertions.assertEquals(0, vaultResources.size());
 
         List<HasMetadata> secretResources = Arrays.stream(rawOutput.split("---"))
@@ -57,7 +59,7 @@ class HelmChartParserTest {
                 .filter(Objects::nonNull)
                 .map(HasMetadata.class::cast)
                 .filter(r -> r.getKind().equalsIgnoreCase("Secret"))
-                .toList();
+                .collect(Collectors.toList());
         Assertions.assertEquals(1, secretResources.size());
     }
 

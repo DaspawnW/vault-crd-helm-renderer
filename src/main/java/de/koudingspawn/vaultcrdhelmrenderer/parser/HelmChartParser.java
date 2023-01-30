@@ -13,6 +13,7 @@ import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class HelmChartParser {
 
@@ -38,7 +39,7 @@ public class HelmChartParser {
                 .map(Serialization::asYaml)
                 .map(s -> Serialization.unmarshal(s, Vault.class))
                 .filter(n -> n.getSpec().getType().equals(VaultType.PROPERTIES))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public void replaceVaultPropertyWithSecret(Vault oldResource, Secret newResource) {
@@ -66,7 +67,7 @@ public class HelmChartParser {
 
     public String toString() {
         return String.join(System.lineSeparator(),
-                resourceList.stream().map(Serialization::asYaml).toList());
+                resourceList.stream().map(Serialization::asYaml).collect(Collectors.toList()));
     }
 
     private int findIndexOfResource(Vault idxResource) {

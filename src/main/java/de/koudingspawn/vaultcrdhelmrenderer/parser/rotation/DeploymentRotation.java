@@ -32,7 +32,7 @@ public class DeploymentRotation implements Rotation {
                 deployment.getSpec().getTemplate().getMetadata().setAnnotations(new HashMap<>());
             }
 
-            String annotationName = "vault.koudingspawn.de-%s/compare".formatted(secretName);
+            String annotationName = String.format("vault.koudingspawn.de-%s/compare", secretName);
             deployment.getSpec().getTemplate().getMetadata().getAnnotations().put(annotationName, annotation);
         }
 
