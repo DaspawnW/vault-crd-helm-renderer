@@ -14,7 +14,7 @@ public class StatefulsetRotationTest {
     @ParameterizedTest
     @ValueSource(strings = {"statefulset-with-volume-mount.yaml", "statefulset-with-env.yaml", "statefulset-with-env-from.yaml", "statefulset-with-init-env.yaml", "statefulset-with-init-env-from.yaml"})
     void referencesSecretInVolumeMount(String resource) {
-        String s = FileUtils.fileAsString("/yamls/statefulsetrotation/%s".formatted(resource));
+        String s = FileUtils.fileAsString(String.format("/yamls/statefulsetrotation/%s", resource));
         StatefulSet statefulset = Serialization.unmarshal(s, StatefulSet.class);
 
         StatefulSet annotatedResource = (StatefulSet) new StatefulsetRotation().annotate(statefulset, "application-properties", "annotation-value");
