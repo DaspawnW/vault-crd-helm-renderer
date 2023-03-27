@@ -10,6 +10,7 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 class HelmChartParserTest {
 
     private static String rawYaml = FileUtils.fileAsString("/yamls/output.yaml");
+    private static String splitTestYaml = FileUtils.fileAsString("/yamls/split-test.yaml");
 
     @Test
     void shouldParseYamlSuccessful() {
@@ -26,14 +28,14 @@ class HelmChartParserTest {
     }
 
     @Test
-    void shouldFindVaultResources() {
+    void shouldFindVaultResources() throws IOException {
         List<Vault> vaultPropertiesResources = new HelmChartParser(rawYaml).findVaultPropertiesResources();
         Assertions.assertEquals(1, vaultPropertiesResources.size());
         Assertions.assertEquals("application-properties", vaultPropertiesResources.get(0).getMetadata().getName());
     }
 
     @Test
-    void shouldReplaceVaultResourceWithSecret() {
+    void shouldReplaceVaultResourceWithSecret() throws IOException {
         HelmChartParser helmChartParser = new HelmChartParser(rawYaml);
         List<Vault> vaultPropertiesResources = helmChartParser.findVaultPropertiesResources();
 
@@ -61,6 +63,15 @@ class HelmChartParserTest {
                 .filter(r -> r.getKind().equalsIgnoreCase("Secret"))
                 .collect(Collectors.toList());
         Assertions.assertEquals(1, secretResources.size());
+    }
+
+    @Test
+    void shouldParseWithFileSeparator() throws IOException {
+        HelmChartParser helmChartParser = new HelmChartParser(splitTestYaml);
+        List<Vault> vaultPropertiesResources = helmChartParser.findVaultPropertiesResources();
+        Assertions.assertEquals(1, vaultPropertiesResources.size());
+
+        Assertions.assertEquals(3, helmChartParser.listResources().size());
     }
 
 }

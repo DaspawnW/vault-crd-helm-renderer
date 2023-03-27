@@ -8,6 +8,7 @@ import de.koudingspawn.vaultcrdhelmrenderer.vault.VaultCommunication;
 import de.koudingspawn.vaultcrdhelmrenderer.vault.VaultTokenConnection;
 import io.fabric8.kubernetes.api.model.Secret;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Processor {
@@ -18,7 +19,7 @@ public class Processor {
         this.vaultTokenConnection = new VaultTokenConnection(vaultAddr, vaultToken);
     }
 
-    String processYaml(String yamlContent) throws SecretNotAccessibleException {
+    String processYaml(String yamlContent) throws SecretNotAccessibleException, IOException {
         HelmChartParser helmChartParser = new HelmChartParser(yamlContent);
 
         VaultCommunication vaultCommunication = new VaultCommunication(vaultTokenConnection.getVaultTemplate());

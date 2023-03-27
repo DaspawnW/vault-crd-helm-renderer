@@ -1,0 +1,47 @@
+---
+# Source: templates/properties.yaml
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: properties
+  labels:
+    test: property
+spec:
+  type: "PROPERTIES"
+  propertiesConfiguration:
+    files:
+      application.properties: |-
+        # --------
+        #
+        # Read readme.txt first
+        !
+        
+        # Default=1800 (30 minutes)
+        #
+        test.property=3600
+---
+# Source: charts/deployment/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-service-account
+---
+# Source: unknown
+---
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-service
+  labels:
+    test: property
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    qwe: asd
+---

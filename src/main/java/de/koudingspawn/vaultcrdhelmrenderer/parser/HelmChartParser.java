@@ -1,5 +1,8 @@
 package de.koudingspawn.vaultcrdhelmrenderer.parser;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import de.koudingspawn.vaultcrdhelmrenderer.crd.Vault;
 import de.koudingspawn.vaultcrdhelmrenderer.crd.VaultType;
 import de.koudingspawn.vaultcrdhelmrenderer.parser.rotation.DeploymentRotation;
@@ -10,8 +13,10 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -20,12 +25,14 @@ public class HelmChartParser {
     private static List<Rotation> rotationList = List.of(new DeploymentRotation(), new StatefulsetRotation());
     private final List<HasMetadata> resourceList;
 
-    public HelmChartParser(String rawContent) {
+    public HelmChartParser(String rawContent) throws IOException {
+        this.resourceList = new ArrayList<>();
+
         String kind = "koudingspawn.de/v1#Vault";
         KubernetesDeserializer.registerCustomKind(kind, Vault.class);
 
-        this.resourceList = new ArrayList<>();
-        for (String s : rawContent.split("---")) {
+        List<String> rawObjects = splitYamlFile(rawContent);
+        for (String s : rawObjects) {
             HasMetadata resource = Serialization.unmarshal(s);
             if (resource != null) {
                 resourceList.add(resource);
@@ -49,6 +56,17 @@ public class HelmChartParser {
         this.annotateReferencingResources(newResource);
     }
 
+    private List<String> splitYamlFile(String rawYaml) throws IOException {
+        YAMLParser parser = new YAMLFactory()
+                .createParser(rawYaml);
+        List<Object> objectNodes = new ObjectMapper().readValues(parser, Object.class).readAll();
+
+        return objectNodes.stream()
+                .filter(Objects::nonNull)
+                .map(Serialization::asYaml)
+                .collect(Collectors.toList());
+    }
+
     private void annotateReferencingResources(Secret newResource) {
         for (int i = 0; i < resourceList.size(); i++) {
             HasMetadata hasMetadata = resourceList.get(i);
@@ -68,6 +86,10 @@ public class HelmChartParser {
     public String toString() {
         return String.join(System.lineSeparator(),
                 resourceList.stream().map(Serialization::asYaml).collect(Collectors.toList()));
+    }
+
+    protected List<HasMetadata> listResources() {
+        return resourceList;
     }
 
     private int findIndexOfResource(Vault idxResource) {

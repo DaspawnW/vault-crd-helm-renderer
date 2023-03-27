@@ -12,6 +12,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.vault.VaultContainer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -29,7 +30,7 @@ class ProcessorIntegrationTest {
                     "kv put datasource/credentials username=user123 password=password123");
 
     @Test
-    void shouldProcessYamlFile() throws SecretNotAccessibleException {
+    void shouldProcessYamlFile() throws SecretNotAccessibleException, IOException {
         String s = FileUtils.fileAsString("/yamls/output.yaml");
         String renderedYaml = new Processor(vaultContainer.getHttpHostAddress(), VAULT_TOKEN).processYaml(s);
 
@@ -60,7 +61,7 @@ class ProcessorIntegrationTest {
     }
 
     @Test
-    void shouldProcessYamlFileWithoutPropertiesSecret() throws SecretNotAccessibleException {
+    void shouldProcessYamlFileWithoutPropertiesSecret() throws SecretNotAccessibleException, IOException {
         String s = FileUtils.fileAsString("/yamls/without-match.yaml");
         String renderedYaml = new Processor(vaultContainer.getHttpHostAddress(), VAULT_TOKEN).processYaml(s);
 
