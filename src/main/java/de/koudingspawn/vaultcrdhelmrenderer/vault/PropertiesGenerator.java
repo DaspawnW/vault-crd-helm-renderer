@@ -12,9 +12,12 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PropertiesGenerator {
 
+    private static final Pattern expressionRegex = Pattern.compile("\\{\\{\\s{0,2}vault\\.lookup(V2)?\\(");
     private final VaultCommunication vaultCommunication;
 
     public PropertiesGenerator(VaultCommunication vaultCommunication) {
@@ -34,7 +37,7 @@ public class PropertiesGenerator {
             try {
                 Map<String, String> renderedFiles = renderFiles(context, propertiesConfiguration.getFiles());
                 return renderSecret(resource, renderedFiles);
-            } catch (FatalTemplateErrorsException ex) {
+            } catch (FatalTemplateErrorsException | RenderingException ex) {
                 throw new SecretNotAccessibleException(ex.getMessage(), ex);
             }
         }
@@ -66,16 +69,26 @@ public class PropertiesGenerator {
         return Sha256.generateSha256(data.values().toArray(new String[0]));
     }
 
-    private Map<String, String> renderFiles(Map<String, Object> context, Map<String, String> files) throws FatalTemplateErrorsException {
+    private Map<String, String> renderFiles(Map<String, Object> context, Map<String, String> files) throws FatalTemplateErrorsException, RenderingException {
         Jinjava jinjava = new Jinjava();
         Map<String, String> targetFiles = new HashMap<>();
 
-        files.forEach((key, value) -> {
-            String renderedContent = jinjava.render(value, context);
-            targetFiles.put(key, Base64.getEncoder().encodeToString(renderedContent.getBytes()));
-        });
+        for (Map.Entry<String, String> entry : files.entrySet()) {
+            String renderedContent = jinjava.render(entry.getValue(), context);
+            if (hasRenderingIssue(renderedContent)) {
+                throw new RenderingException("Failed to render " + entry.getKey() + " in vault properties as it still contains expressions, probably some syntax issue occurred!");
+            }
+
+            targetFiles.put(entry.getKey(), Base64.getEncoder().encodeToString(renderedContent.getBytes()));
+        }
 
         return targetFiles;
+    }
+
+    // add a self developed test to identify if jinjava rendering fails due to invalid syntax: https://github.com/HubSpot/jinjava/issues/1038
+    private boolean hasRenderingIssue(String renderedContent) {
+        Matcher matcher = expressionRegex.matcher(renderedContent);
+        return matcher.find();
     }
 
 }

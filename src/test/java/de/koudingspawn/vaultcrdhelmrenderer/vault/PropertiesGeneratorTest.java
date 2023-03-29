@@ -90,4 +90,18 @@ class PropertiesGeneratorTest {
         Assertions.assertThrows(SecretNotAccessibleException.class, () -> propertiesGenerator.generateSecret(vaultResource));
     }
 
+    @Test
+    void shouldFailWithInvalidSyntax() {
+        String kind = "koudingspawn.de/v1#Vault";
+        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
+
+        String s = FileUtils.fileAsString("/yamls/vault-crd-invalid-syntax.yaml");
+        Vault vaultResource = Serialization.unmarshal(s, Vault.class);
+
+        PropertiesGenerator propertiesGenerator = new PropertiesGenerator(vaultCommunication);
+
+        Assertions.assertThrows(SecretNotAccessibleException.class, () ->
+                propertiesGenerator.generateSecret(vaultResource));
+    }
+
 }
