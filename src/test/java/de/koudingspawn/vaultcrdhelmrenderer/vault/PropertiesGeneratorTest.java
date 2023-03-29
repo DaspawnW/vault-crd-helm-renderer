@@ -8,18 +8,22 @@ import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class PropertiesGeneratorTest {
 
     @Mock
@@ -36,7 +40,7 @@ class PropertiesGeneratorTest {
         HashMap<String, String> objectObjectHashMap = new HashMap<>();
         objectObjectHashMap.put("username", "username");
         objectObjectHashMap.put("password", "password");
-        when(vaultCommunication.getVersionedSecret(eq("kv-test/qwe/asd"), eq(Optional.empty())))
+        when(vaultCommunication.getVersionedSecret("kv-test/qwe/asd", Optional.empty()))
                 .thenReturn(objectObjectHashMap);
         when(vaultCommunication.getKeyValue("kv-1-test/qwe/asd"))
                 .thenReturn(objectObjectHashMap);
@@ -83,23 +87,28 @@ class PropertiesGeneratorTest {
 
         HashMap<String, String> objectObjectHashMap = new HashMap<>();
         objectObjectHashMap.put("password", "password");
-        when(vaultCommunication.getVersionedSecret(eq("kv-test/qwe/asd"), eq(Optional.empty())))
+        when(vaultCommunication.getVersionedSecret("kv-test/qwe/asd", Optional.empty()))
                 .thenReturn(objectObjectHashMap);
 
         PropertiesGenerator propertiesGenerator = new PropertiesGenerator(vaultCommunication);
         Assertions.assertThrows(SecretNotAccessibleException.class, () -> propertiesGenerator.generateSecret(vaultResource));
     }
 
-    @Test
-    void shouldFailWithInvalidSyntax() {
+    @ParameterizedTest
+    @ValueSource(strings = {"/yamls/vault-crd-invalid-syntax-v1.yaml", "/yamls/vault-crd-invalid-syntax-v2.yaml"})
+    void shouldFailWithInvalidSyntax(String fileSource) throws SecretNotAccessibleException {
         String kind = "koudingspawn.de/v1#Vault";
         KubernetesDeserializer.registerCustomKind(kind, Vault.class);
 
-        String s = FileUtils.fileAsString("/yamls/vault-crd-invalid-syntax.yaml");
+        String s = FileUtils.fileAsString(fileSource);
         Vault vaultResource = Serialization.unmarshal(s, Vault.class);
 
-        PropertiesGenerator propertiesGenerator = new PropertiesGenerator(vaultCommunication);
+        HashMap<String, String> objectObjectHashMap = new HashMap<>();
+        objectObjectHashMap.put("username", "renderedusername");
+        when(vaultCommunication.getVersionedSecret("kv-test/qwe/asd", Optional.empty()))
+                .thenReturn(objectObjectHashMap);
 
+        PropertiesGenerator propertiesGenerator = new PropertiesGenerator(vaultCommunication);
         Assertions.assertThrows(SecretNotAccessibleException.class, () ->
                 propertiesGenerator.generateSecret(vaultResource));
     }

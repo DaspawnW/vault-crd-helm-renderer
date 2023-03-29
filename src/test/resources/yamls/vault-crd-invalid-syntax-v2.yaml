@@ -1,0 +1,17 @@
+apiVersion: "koudingspawn.de/v1"
+kind: Vault
+metadata:
+  name: example-properties
+  labels:
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.0"
+spec:
+  type: "PROPERTIES"
+  propertiesConfiguration:
+    context:
+      namespace: example-namespace
+    files:
+      mix-multiline: |
+        This is a test
+        rendered-secret: "{ { vault.lookupV2('kv-test/qwe/asd', 'username') }}"
+        It should fail due to rendering issues
