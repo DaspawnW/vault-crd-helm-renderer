@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 public class PropertiesGenerator {
 
-    private static final Pattern expressionRegex = Pattern.compile("\\{\\{\\s*?vault\\.lookup(V2)?\\(");
+    private static final Pattern expressionRegex = Pattern.compile("\\{\\{\\s*vault\\.lookup(V2)?\\(");
     private final VaultCommunication vaultCommunication;
 
     public PropertiesGenerator(VaultCommunication vaultCommunication) {
