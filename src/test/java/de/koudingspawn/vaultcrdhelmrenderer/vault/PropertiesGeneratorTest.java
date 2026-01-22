@@ -31,9 +31,6 @@ class PropertiesGeneratorTest {
 
     @Test
     void generateSecretFromVaultResource() throws SecretNotAccessibleException {
-        String kind = "koudingspawn.de/v1#Vault";
-        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
-
         String s = FileUtils.fileAsString("/yamls/vault-crd.yaml");
         Vault vaultResource = Serialization.unmarshal(s, Vault.class);
 
@@ -79,9 +76,6 @@ class PropertiesGeneratorTest {
 
     @Test
     void shouldFailRenderingWithException() throws SecretNotAccessibleException {
-        String kind = "koudingspawn.de/v1#Vault";
-        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
-
         String s = FileUtils.fileAsString("/yamls/vault-crd.yaml");
         Vault vaultResource = Serialization.unmarshal(s, Vault.class);
 
@@ -97,9 +91,6 @@ class PropertiesGeneratorTest {
     @ParameterizedTest
     @ValueSource(strings = {"/yamls/vault-crd-invalid-syntax-v1.yaml", "/yamls/vault-crd-invalid-syntax-v2.yaml"})
     void shouldFailWithInvalidSyntax(String fileSource) throws SecretNotAccessibleException {
-        String kind = "koudingspawn.de/v1#Vault";
-        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
-
         String s = FileUtils.fileAsString(fileSource);
         Vault vaultResource = Serialization.unmarshal(s, Vault.class);
 

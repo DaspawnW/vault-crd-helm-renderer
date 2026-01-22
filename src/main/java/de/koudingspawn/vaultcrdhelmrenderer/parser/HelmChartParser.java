@@ -28,9 +28,6 @@ public class HelmChartParser {
     public HelmChartParser(String rawContent) throws IOException {
         this.resourceList = new ArrayList<>();
 
-        String kind = "koudingspawn.de/v1#Vault";
-        KubernetesDeserializer.registerCustomKind(kind, Vault.class);
-
         List<String> rawObjects = splitYamlFile(rawContent);
         for (String s : rawObjects) {
             HasMetadata resource = Serialization.unmarshal(s);
