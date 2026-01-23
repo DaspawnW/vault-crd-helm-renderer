@@ -23,7 +23,7 @@ class ProcessorIntegrationTest {
 
     private static String VAULT_TOKEN = "dev";
     @Container
-    public static VaultContainer<?> vaultContainer = new VaultContainer<>("vault:1.6.1")
+    public static VaultContainer<?> vaultContainer = new VaultContainer<>("hashicorp/vault:1.21")
             .withVaultToken(VAULT_TOKEN)
             .withInitCommand("secrets enable --version=2 --path=datasource kv",
                     "kv put datasource/host host=localhost",
