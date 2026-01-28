@@ -7,8 +7,12 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 21
         uses: actions/setup-java@v3
@@ -32,3 +36,26 @@ jobs:
           generate_release_notes: true
           tag_name: ${{ github.ref }}
           name: ${{ github.ref_name }}
+
+      - name: Update plugin version
+        run: |
+          
+          # Install yq (Python-based apt version)
+          sudo apt-get update
+          sudo apt-get install -y yq
+          
+          # Update version in plugin.yaml using yq (Python/jq syntax)
+          yq -y --in-place ".version = \"${{ github.ref_name }}\"" plugin.yaml
+          yq -y --in-place ".runtimeConfig.platformHooks.install[0].args[0] = \"${{ github.ref_name }}\"" plugin.yaml
+          yq -y --in-place ".runtimeConfig.platformHooks.update[0].args[0] = \"${{ github.ref_name }}\"" plugin.yaml
+          
+
+          # Commit and push changes
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          git add plugin.yaml
+          git commit -m "Update helm plugin version to ${{ github.ref_name }}" || true
+          git push origin main || true

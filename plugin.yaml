@@ -1,0 +1,20 @@
+apiVersion: v1
+type: postrenderer/v1
+name: vault-crd-helm-renderer
+version: v1.0.8
+runtime: subprocess
+runtimeConfig:
+  platformCommand:
+    - command: java
+      args:
+        - -jar
+        - ${HELM_PLUGIN_DIR}/vault-crd-helm-renderer.jar
+  platformHooks:
+    install:
+      - command: ${HELM_PLUGIN_DIR}/scripts/install.sh
+        args:
+          - v1.0.8
+    update:
+      - command: ${HELM_PLUGIN_DIR}/scripts/install.sh
+        args:
+          - v1.0.8
