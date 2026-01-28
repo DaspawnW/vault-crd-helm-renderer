@@ -40,14 +40,14 @@ jobs:
       - name: Update plugin version
         run: |
           
-          # Install yq
+          # Install yq (Python-based apt version)
           sudo apt-get update
           sudo apt-get install -y yq
           
-          # Update version in plugin.yaml using yq
-          yq e ".version = \"${{ github.ref_name }}\"" -i plugin.yaml
-          yq e ".runtimeConfig.platformHooks.install[0].args[0] = \"${{ github.ref_name }}\"" -i plugin.yaml
-          yq e ".runtimeConfig.platformHooks.update[0].args[0] = \"${{ github.ref_name }}\"" -i plugin.yaml
+          # Update version in plugin.yaml using yq (Python/jq syntax)
+          yq -y --in-place ".version = \"${{ github.ref_name }}\"" plugin.yaml
+          yq -y --in-place ".runtimeConfig.platformHooks.install[0].args[0] = \"${{ github.ref_name }}\"" plugin.yaml
+          yq -y --in-place ".runtimeConfig.platformHooks.update[0].args[0] = \"${{ github.ref_name }}\"" plugin.yaml
           
 
           # Commit and push changes
