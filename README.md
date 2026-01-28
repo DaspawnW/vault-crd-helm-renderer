@@ -12,7 +12,7 @@
 
 Install:
 ```bash
-helm plugin install --verify=false https://github.com/camaeel/vault-crd-helm-renderer
+helm plugin install --verify=false https://github.com/DaspawnW/vault-crd-helm-renderer
 ```
 
 Usage:
