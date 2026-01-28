@@ -56,6 +56,6 @@ jobs:
           git fetch origin main
           git checkout main
           git pull origin main
-          git add plugin.yaml scripts/install.sh README.md
+          git add plugin.yaml
           git commit -m "Update helm plugin version to ${{ github.ref_name }}" || true
           git push origin main || true
