@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -ex
 set -o pipefail
 
 VERSION="$1"
