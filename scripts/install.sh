@@ -15,4 +15,4 @@ fi
 if [ $# -eq 0 ]; then
   VERSION=$(curl -sf https://api.github.com/repos/DaspawnW/vault-crd-helm-renderer/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 fi
-curl -Lf -o vault-crd-helm-renderer.jar "https://github.com/DaspawnW/vault-crd-helm-renderer/releases/download/${VERSION}/vault-crd-helm-renderer.jar"
+curl -Lf -o ${HELM_PLUGIN_DIR}/vault-crd-helm-renderer.jar "https://github.com/DaspawnW/vault-crd-helm-renderer/releases/download/${VERSION}/vault-crd-helm-renderer.jar"
