@@ -11,19 +11,10 @@ runtimeConfig:
     - ${HELM_PLUGIN_DIR}/vault-crd-helm-renderer.jar
   platformHooks:
     install:
-#    - command: curl
-#      args:
-#      - -L
-#      - -o
-#      - /tmp/vault-crd-helm-renderer.jar
-#      - https://github.com/DaspawnW/vault-crd-helm-renderer/releases/download/v1.0.8/vault-crd-helm-renderer.jar
-    - command: echo
+    - command: ${HELM_PLUGIN_DIR}/scripts/install.sh
       args:
-      - "${HELM_PLUGIN_DIR}"
+      - v1.0.8
     update:
-    - command: curl
+    - command: ${HELM_PLUGIN_DIR}/scripts/install.sh
       args:
-      - -L
-      - -o
-      - /tmp/vault-crd-helm-renderer.jar
-      - https://github.com/DaspawnW/vault-crd-helm-renderer/releases/download/v1.0.8/vault-crd-helm-renderer.jar
+      - v1.0.8
