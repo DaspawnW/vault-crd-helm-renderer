@@ -9,7 +9,8 @@ runtimeConfig:
     args:
     - -jar
     - ${HELM_PLUGIN_DIR}/vault-crd-helm-renderer.jar
-  install:
+  platformHooks:
+    install:
     - command: curl
       args:
       - -L
