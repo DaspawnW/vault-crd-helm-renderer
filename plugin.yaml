@@ -1,7 +1,7 @@
 apiVersion: v1
 type: postrenderer/v1
 name: vault-crd-helm-renderer
-version: v1.0.9
+version: 1.0.9
 runtime: subprocess
 runtimeConfig:
   platformCommand:
